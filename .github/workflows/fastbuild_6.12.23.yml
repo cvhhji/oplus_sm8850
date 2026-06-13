@@ -344,7 +344,7 @@ jobs:
         if: inputs.unicode_enable
         run: |
           echo "正在添加零宽补丁…"
-          cd kernel_workspace
+          cd kernel_workspace/common
           wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/other_patch/unicode.patch
           patch -p1 -F 3 --forward < unicode.patch || true
           
