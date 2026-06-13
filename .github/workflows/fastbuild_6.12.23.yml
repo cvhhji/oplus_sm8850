@@ -42,6 +42,11 @@ on:
         required: true
         type: boolean
         default: 'false'
+      unicode_enable:
+        description: "是否添加Unicode不可见字码点绕过读取漏洞修复？"
+        type: boolean
+        required: true
+        default: 'true'
       bbr_enable:
         description: "是否启用bbr算法(优化上行数据,对手机日用无太大意义甚至可能负优化;false关闭,true仅加入算法,default启用算法并设为默认)"
         required: true
@@ -64,7 +69,7 @@ on:
         description: '是否开启网络功能拓展配置(用于为ipset及需要iptables等高级网络功能内核支持的程序提供支持)'
         required: true
         type: boolean
-        default: 'false'
+        default: 'true'
       adios_enable:
         description: '是否启用ADIOS IO调度器支持(提升IO读写性能)'
         required: true
@@ -79,7 +84,7 @@ on:
         description: '是否开启内核级基带保护(阻止一切对非用户分区的写入，有效防止格机)'
         required: true
         type: boolean
-        default: 'true'
+        default: 'false'
       ccache_update:
         description: '更新ccache缓存(将本次编译生成的ccache缓存覆盖至仓库缓存，在更改编译配置、源码或需要刷新缓存时开启)'
         required: true
@@ -94,7 +99,7 @@ on:
         description: '内核后缀(留空默认,开头别加连字符,勿加空格等影响指令运行的保留字符)'
         required: false
         type: string
-        default: ''
+        default: 'ZAOMIN'
 
 jobs:
   build:
@@ -334,6 +339,14 @@ jobs:
           cd kernel_workspace/common
           wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/other_patch/lz4kd.patch
           patch -p1 -F 3 < lz4kd.patch || true
+          
+      - name: UNICODE_BYPASS补丁
+        if: inputs.unicode_enable
+        run: |
+          echo "正在添加零宽补丁…"
+          cd kernel_workspace
+          wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/other_patch/unicode.patch
+          patch -p1 -F 3 --forward < unicode.patch || true
           
       - name: 添加SUSFS 配置项
         if: inputs.susfs_enable
